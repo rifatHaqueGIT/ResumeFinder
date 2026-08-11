@@ -1,0 +1,8 @@
+# Output files
+*.xlsx
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
