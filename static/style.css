@@ -1,0 +1,904 @@
+/* ═══════════════════════════════════════════════════════════════
+   Resume Intelligence Dashboard — Premium Dark Theme
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Reset & Variables ─────────────────────────────────────────── */
+:root {
+    --bg-primary: #0a0a14;
+    --bg-secondary: #0f0f1e;
+    --bg-card: rgba(18, 18, 35, 0.85);
+    --bg-card-hover: rgba(25, 25, 50, 0.95);
+    --bg-glass: rgba(255, 255, 255, 0.04);
+    --bg-glass-hover: rgba(255, 255, 255, 0.08);
+
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888a8;
+    --text-muted: #555570;
+    --text-bright: #ffffff;
+
+    --accent-cyan: #00d4ff;
+    --accent-purple: #8b5cf6;
+    --accent-blue: #3b82f6;
+    --accent-gradient: linear-gradient(135deg, #00d4ff, #8b5cf6);
+    --accent-gradient-warm: linear-gradient(135deg, #f59e0b, #ef4444);
+
+    --score-high: #22c55e;
+    --score-medium: #f59e0b;
+    --score-low: #ef4444;
+
+    --found: #22c55e;
+    --found-bg: rgba(34, 197, 94, 0.12);
+    --missing: #ef4444;
+    --missing-bg: rgba(239, 68, 68, 0.12);
+
+    --border: rgba(255, 255, 255, 0.06);
+    --border-hover: rgba(255, 255, 255, 0.12);
+
+    --sidebar-width: 240px;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 48px rgba(0, 0, 0, 0.4);
+
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────── */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin-bottom: 32px;
+}
+
+.brand-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--accent-gradient);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: #000;
+    flex-shrink: 0;
+}
+
+.brand-text {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--text-bright);
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all var(--transition);
+}
+
+.nav-link svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity var(--transition);
+}
+
+.nav-link:hover {
+    background: var(--bg-glass-hover);
+    color: var(--text-primary);
+}
+
+.nav-link:hover svg {
+    opacity: 1;
+}
+
+.nav-link.active {
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--accent-cyan);
+}
+
+.nav-link.active svg {
+    opacity: 1;
+    stroke: var(--accent-cyan);
+}
+
+/* ── Main Content ──────────────────────────────────────────────── */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    padding: 32px 40px;
+    min-height: 100vh;
+}
+
+.section {
+    display: none;
+    animation: fadeIn 0.35s ease;
+}
+
+.section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+    margin-bottom: 32px;
+}
+
+.section-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+}
+
+.section-subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.subsection-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 32px 0 16px;
+}
+
+/* ── Hero Stats ────────────────────────────────────────────────── */
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    backdrop-filter: blur(12px);
+    transition: all var(--transition);
+}
+
+.stat-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+/* ── Role Cards ────────────────────────────────────────────────── */
+.role-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.role-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(12px);
+    transition: all var(--transition);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.role-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-gradient);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.role-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.role-card:hover::before {
+    opacity: 1;
+}
+
+.role-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 12px;
+}
+
+.role-card-best {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.role-card-best strong {
+    color: var(--accent-cyan);
+}
+
+.role-card-score {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.score-gauge {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+}
+
+.score-gauge svg {
+    transform: rotate(-90deg);
+}
+
+.score-gauge-bg {
+    stroke: rgba(255, 255, 255, 0.06);
+}
+
+.score-gauge-fill {
+    transition: stroke-dashoffset 1s ease;
+}
+
+.score-gauge-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.score-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.score-label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.score-coverage {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ── Role Tabs ─────────────────────────────────────────────────── */
+.role-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.role-tab {
+    padding: 8px 20px;
+    border-radius: 99px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.role-tab:hover {
+    background: var(--bg-glass-hover);
+    color: var(--text-primary);
+}
+
+.role-tab.active {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: rgba(0, 212, 255, 0.3);
+    color: var(--accent-cyan);
+}
+
+/* ── Role Content / Rankings ───────────────────────────────────── */
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ranking-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+    transition: all var(--transition);
+}
+
+.ranking-item:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+}
+
+.ranking-rank {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-muted);
+    min-width: 32px;
+    text-align: center;
+}
+
+.ranking-item:first-child .ranking-rank {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ranking-info h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+}
+
+.ranking-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.ranking-score-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* ── Keyword Section (inside role deep-dive) ───────────────────── */
+.keyword-section {
+    margin-top: 28px;
+}
+
+.keyword-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.keyword-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.keyword-category {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+}
+
+.keyword-category-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.keyword-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.kw-pill {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: transform 0.15s ease;
+}
+
+.kw-pill:hover {
+    transform: scale(1.05);
+}
+
+.kw-pill.found {
+    background: var(--found-bg);
+    color: var(--found);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.kw-pill.missing {
+    background: var(--missing-bg);
+    color: var(--missing);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* ── Resume Selector ───────────────────────────────────────────── */
+.resume-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.resume-chip {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.resume-chip:hover {
+    background: var(--bg-glass-hover);
+    color: var(--text-primary);
+}
+
+.resume-chip.active {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: var(--accent-purple);
+}
+
+/* ── Inspector Content ─────────────────────────────────────────── */
+.inspector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.inspector-role-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: all var(--transition);
+}
+
+.inspector-role-card:hover {
+    border-color: var(--border-hover);
+}
+
+.inspector-role-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    margin-bottom: 16px;
+}
+
+.breakdown-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.breakdown-label {
+    color: var(--text-secondary);
+}
+
+.breakdown-bar-container {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 99px;
+    margin: 0 12px;
+    overflow: hidden;
+}
+
+.breakdown-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent-gradient);
+    transition: width 0.8s ease;
+}
+
+.breakdown-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* ── Keyword Matrix ────────────────────────────────────────────── */
+.matrix-table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+}
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.matrix-table th {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+}
+
+.matrix-table th.resume-header {
+    text-align: center;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.matrix-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.matrix-table tr:hover td {
+    background: var(--bg-glass-hover);
+}
+
+.matrix-table td.kw-cell {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.matrix-table td.cat-cell {
+    font-weight: 700;
+    color: var(--accent-cyan);
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.matrix-dot {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+.matrix-dot.found {
+    background: var(--found);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+}
+
+.matrix-dot.missing {
+    background: var(--missing-bg);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ── Tips Section ──────────────────────────────────────────────── */
+.tips-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.glass-select {
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    min-width: 240px;
+    cursor: pointer;
+    transition: border-color var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888a8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.glass-select:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+}
+
+.glass-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.tips-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tip-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    border-left: 3px solid;
+    transition: all var(--transition);
+}
+
+.tip-card:hover {
+    background: var(--bg-card-hover);
+}
+
+.tip-card.severity-high {
+    border-left-color: var(--score-low);
+}
+
+.tip-card.severity-medium {
+    border-left-color: var(--score-medium);
+}
+
+.tip-card.severity-low {
+    border-left-color: var(--score-high);
+}
+
+.tip-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.tip-badge {
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tip-badge.high {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--score-low);
+}
+
+.tip-badge.medium {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--score-medium);
+}
+
+.tip-badge.low {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--score-high);
+}
+
+.tip-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-bright);
+}
+
+.tip-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.tip-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tip-kw {
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(139, 92, 246, 0.12);
+    color: var(--accent-purple);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* ── Radar Chart ───────────────────────────────────────────────── */
+.radar-container {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0;
+}
+
+.radar-canvas {
+    max-width: 350px;
+}
+
+/* ── Loading Overlay ───────────────────────────────────────────── */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 20, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.4s ease;
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader {
+    text-align: center;
+}
+
+.loader p {
+    color: var(--text-secondary);
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.loader-ring {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.08);
+    border-top-color: var(--accent-cyan);
+    border-radius: 50%;
+    margin: 0 auto;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Empty State ───────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state p {
+    font-size: 14px;
+}
+
+/* ── Score Colors ──────────────────────────────────────────────── */
+.score-high { color: var(--score-high); }
+.score-medium { color: var(--score-medium); }
+.score-low { color: var(--score-low); }
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+        padding: 16px 8px;
+    }
+    .sidebar .brand-text,
+    .sidebar .nav-link span {
+        display: none;
+    }
+    .sidebar-brand {
+        justify-content: center;
+    }
+    .main-content {
+        margin-left: 60px;
+        padding: 20px 16px;
+    }
+    .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .role-cards {
+        grid-template-columns: 1fr;
+    }
+}
