@@ -1,0 +1,10 @@
+# Resume Intelligence v2 — Backend Dependencies
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic-settings
+python-multipart
+PyPDF2
+python-docx
+openpyxl
+httpx

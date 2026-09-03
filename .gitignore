@@ -9,3 +9,18 @@ __pycache__/
 
 # Flask
 instance/
+
+# Database
+*.db
+*.sqlite3
+
+# Environment
+.env
+
+# Node
+node_modules/
+.next/
+
+# OS
+.DS_Store
+Thumbs.db
