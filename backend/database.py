@@ -37,7 +37,7 @@ def get_db():
 
 def create_tables():
     """Create all tables defined in models.py. Enable pgvector for PostgreSQL."""
-    from backend.models import Resume, ResumeAnalysis  # noqa: F401
+    from backend.models import Resume, ResumeAnalysis, ResumeChunk, ChatMessage  # noqa: F401
 
     # Enable pgvector extension on PostgreSQL
     if is_postgres:

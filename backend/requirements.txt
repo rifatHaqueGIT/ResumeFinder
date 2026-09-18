@@ -3,6 +3,7 @@ fastapi
 uvicorn[standard]
 sqlalchemy
 psycopg2-binary
+pgvector
 pydantic-settings
 python-multipart
 PyPDF2

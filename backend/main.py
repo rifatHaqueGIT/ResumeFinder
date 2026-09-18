@@ -4,12 +4,13 @@ Resume Intelligence Dashboard v2 — FastAPI application entry point.
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
 from backend.config import settings
-from backend.database import create_tables
-from backend.routers import resumes, roles
+from backend.database import create_tables, get_db
+from backend.routers import resumes, roles, chat, jobs
 
 
 @asynccontextmanager
@@ -41,11 +42,26 @@ app.add_middleware(
 # Register routers
 app.include_router(resumes.router)
 app.include_router(roles.router)
+app.include_router(chat.router)
+app.include_router(jobs.router)
 
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "version": "2.0.0"}
+    from backend.services.ollama import is_ollama_available
+    return {
+        "status": "ok",
+        "version": "2.0.0",
+        "ollama": is_ollama_available(),
+    }
+
+
+@app.post("/api/embeddings/generate")
+async def generate_embeddings(db: Session = Depends(get_db)):
+    """Generate vector embeddings for all resumes (run once after seeding)."""
+    from backend.services.embeddings import embed_all_resumes
+    result = await embed_all_resumes(db)
+    return result
 
 
 if __name__ == "__main__":

@@ -9,7 +9,17 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from backend.database import Base
+from backend.database import Base, is_postgres
+
+# Use pgvector's Vector type on PostgreSQL, JSON fallback on SQLite
+if is_postgres:
+    try:
+        from pgvector.sqlalchemy import Vector
+        VectorColumn = lambda dim: Column(Vector(dim))
+    except ImportError:
+        VectorColumn = lambda dim: Column(JSON)
+else:
+    VectorColumn = lambda dim: Column(JSON)
 
 
 class Resume(Base):
@@ -34,6 +44,7 @@ class Resume(Base):
 
     # Relationships
     analyses = relationship("ResumeAnalysis", back_populates="resume", cascade="all, delete-orphan")
+    chunks = relationship("ResumeChunk", back_populates="resume", cascade="all, delete-orphan")
 
 
 class ResumeAnalysis(Base):
@@ -55,3 +66,32 @@ class ResumeAnalysis(Base):
 
     # Relationships
     resume = relationship("Resume", back_populates="analyses")
+
+
+class ResumeChunk(Base):
+    """A chunk of resume text with its vector embedding for RAG."""
+    __tablename__ = "resume_chunks"
+    __table_args__ = (
+        UniqueConstraint("resume_id", "chunk_index", name="uq_resume_chunk"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    resume_id = Column(Integer, ForeignKey("resumes.id"), nullable=False)
+    chunk_index = Column(Integer, nullable=False)
+    chunk_text = Column(Text, nullable=False)
+    embedding = VectorColumn(768)  # nomic-embed-text produces 768-dim
+
+    # Relationships
+    resume = relationship("Resume", back_populates="chunks")
+
+
+class ChatMessage(Base):
+    """Chat history for the resume Q&A feature."""
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    role = Column(String(20), nullable=False)   # 'user' or 'assistant'
+    content = Column(Text, nullable=False)
+    context_chunks = Column(JSON)               # which chunks were used as context
+    created_at = Column(DateTime, default=datetime.utcnow)
+
