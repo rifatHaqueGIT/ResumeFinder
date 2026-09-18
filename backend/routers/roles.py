@@ -110,6 +110,12 @@ def get_keyword_matrix(db: Session = Depends(get_db)):
     resumes_only = db.query(Resume).filter(Resume.doc_type == "Resume").all()
     resume_names = [r.filename for r in resumes_only]
 
+    # Preload ALL analyses in one query instead of N×M individual queries
+    all_analyses = db.query(ResumeAnalysis).all()
+    analysis_map = {}
+    for a in all_analyses:
+        analysis_map[(a.resume_id, a.role_name)] = a
+
     matrix = {}
     for role in ALL_ROLES:
         role_data = {}
@@ -118,12 +124,7 @@ def get_keyword_matrix(db: Session = Depends(get_db)):
             for kw in keywords:
                 row = {"keyword": kw, "resumes": {}}
                 for resume in resumes_only:
-                    analysis = (
-                        db.query(ResumeAnalysis)
-                        .filter(ResumeAnalysis.resume_id == resume.id,
-                                ResumeAnalysis.role_name == role)
-                        .first()
-                    )
+                    analysis = analysis_map.get((resume.id, role))
                     if analysis and analysis.keywords_data:
                         cats = analysis.keywords_data.get("categories", {})
                         cat_kws = cats.get(category, [])
@@ -136,3 +137,4 @@ def get_keyword_matrix(db: Session = Depends(get_db)):
         matrix[role] = {"categories": role_data}
 
     return {"matrix": matrix, "resume_names": resume_names}
+
