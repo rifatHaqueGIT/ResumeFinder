@@ -8,10 +8,10 @@ interface KeywordPillProps {
 export default function KeywordPill({ keyword, found }: KeywordPillProps) {
   return (
     <span
-      className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium border transition-transform hover:scale-105 ${
+      className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium border ${
         found
-          ? "bg-found-bg text-found border-found/20"
-          : "bg-missing-bg text-missing border-missing/20"
+          ? "bg-positive-subtle text-positive border-positive/20"
+          : "bg-negative-subtle text-negative border-negative/20"
       }`}
     >
       {keyword}

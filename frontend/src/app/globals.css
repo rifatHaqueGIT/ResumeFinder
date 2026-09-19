@@ -1,76 +1,68 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-primary: #0a0a14;
-  --color-bg-secondary: #0f0f1e;
-  --color-bg-card: rgba(18, 18, 35, 0.85);
-  --color-bg-card-hover: rgba(25, 25, 50, 0.95);
-  --color-bg-glass: rgba(255, 255, 255, 0.04);
-  --color-bg-glass-hover: rgba(255, 255, 255, 0.08);
+  /* ── Neutral surfaces (dark) ── */
+  --color-surface-base: #0f1117;
+  --color-surface-raised: #161822;
+  --color-surface-overlay: #1c1f2e;
 
-  --color-text-primary: #e8e8f0;
-  --color-text-secondary: #8888a8;
-  --color-text-muted: #555570;
-  --color-text-bright: #ffffff;
+  /* ── Borders ── */
+  --color-border-default: #2a2d3e;
+  --color-border-hover: #3a3e52;
 
-  --color-accent-cyan: #00d4ff;
-  --color-accent-purple: #8b5cf6;
-  --color-accent-blue: #3b82f6;
+  /* ── Text ── */
+  --color-text-primary: #e2e4eb;
+  --color-text-secondary: #7b7f95;
+  --color-text-muted: #4e5266;
+  --color-text-bright: #f4f5f7;
 
-  --color-score-high: #22c55e;
-  --color-score-medium: #f59e0b;
-  --color-score-low: #ef4444;
+  /* ── Primary (blue) ── */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-subtle: rgba(59, 130, 246, 0.1);
 
-  --color-found: #22c55e;
-  --color-found-bg: rgba(34, 197, 94, 0.12);
-  --color-missing: #ef4444;
-  --color-missing-bg: rgba(239, 68, 68, 0.12);
+  /* ── Accent: positive / negative ── */
+  --color-positive: #22c55e;
+  --color-positive-subtle: rgba(34, 197, 94, 0.1);
+  --color-negative: #ef4444;
+  --color-negative-subtle: rgba(239, 68, 68, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-subtle: rgba(245, 158, 11, 0.1);
 
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-hover: rgba(255, 255, 255, 0.12);
+  --radius-default: 6px;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--color-bg-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--color-surface-base);
   color: var(--color-text-primary);
-}
-
-/* Gradient text utility */
-.gradient-text {
-  background: linear-gradient(135deg, #00d4ff, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Score gauge animation */
 .score-gauge-fill {
-  transition: stroke-dashoffset 1s ease;
+  transition: stroke-dashoffset 0.8s ease;
 }
 
-/* Fade in animation */
+/* Fade in */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .animate-fade-in {
-  animation: fadeIn 0.35s ease forwards;
+  animation: fadeIn 0.25s ease forwards;
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-hover); }
+
+/* Select dropdowns */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b7f95' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
 }

@@ -1,152 +1,95 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchAPI, ResumeSummary, ResumeDetail, OverviewData, Tip } from "@/lib/api";
+import { fetchAPI, ResumeListItem, ResumeDetail, Tip } from "@/lib/api";
 import ScoreGauge from "@/components/ScoreGauge";
 
 export default function TipsPage() {
-  const [resumes, setResumes] = useState<ResumeSummary[]>([]);
-  const [roles, setRoles] = useState<string[]>([]);
-  const [selectedResumeId, setSelectedResumeId] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [tips, setTips] = useState<Tip[]>([]);
-  const [analysis, setAnalysis] = useState<{ score: number; label: string; coverage_pct: number } | null>(null);
-  const [resumeName, setResumeName] = useState("");
+  const [resumes, setResumes] = useState<ResumeListItem[]>([]);
+  const [selected, setSelected] = useState<ResumeDetail | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      fetchAPI<ResumeSummary[]>("/api/resumes"),
-      fetchAPI<OverviewData>("/api/overview"),
-    ]).then(([r, o]) => {
-      setResumes(r);
-      setRoles(o.roles);
-    });
+    fetchAPI<ResumeListItem[]>("/api/resumes").then((data) => {
+      const resumesOnly = data.filter((r) => r.doc_type === "Resume");
+      setResumes(resumesOnly);
+      if (resumesOnly.length > 0) selectResume(resumesOnly[0].id);
+    }).finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    if (!selectedResumeId || !selectedRole) return;
-    fetchAPI<ResumeDetail>(`/api/resumes/${selectedResumeId}`).then((d) => {
-      const roleAnalysis = d.role_analyses[selectedRole];
-      if (roleAnalysis) {
-        setTips(roleAnalysis.tips);
-        setAnalysis({
-          score: roleAnalysis.score,
-          label: roleAnalysis.label,
-          coverage_pct: roleAnalysis.keywords.coverage_pct,
-        });
-        setResumeName(d.filename);
-      }
-    });
-  }, [selectedResumeId, selectedRole]);
-
-  const severityColor = (s: string) => {
-    if (s === "high") return "border-l-score-low";
-    if (s === "medium") return "border-l-score-medium";
-    return "border-l-score-high";
+  const selectResume = (id: number) => {
+    fetchAPI<ResumeDetail>(`/api/resumes/${id}`).then(setSelected);
   };
 
-  const badgeClass = (s: string) => {
-    if (s === "high") return "bg-score-low/15 text-score-low";
-    if (s === "medium") return "bg-score-medium/15 text-score-medium";
-    return "bg-score-high/15 text-score-high";
+  if (loading) return <Loader />;
+
+  const severityColor = (severity: string) => {
+    if (severity === "high") return "text-negative";
+    if (severity === "medium") return "text-warning";
+    return "text-primary";
   };
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-[28px] font-extrabold gradient-text mb-1">Resume Builder Tips</h1>
-        <p className="text-text-secondary text-sm">
-          Actionable advice to strengthen your resume for each target role
-        </p>
-      </div>
+      <h1 className="text-lg font-semibold text-text-bright tracking-tight mb-1">Resume Tips</h1>
+      <p className="text-[13px] text-text-secondary mb-5">Improvement suggestions for each resume by role</p>
 
-      {/* Selectors */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <select
-          value={selectedResumeId}
-          onChange={(e) => setSelectedResumeId(e.target.value)}
-          className="px-4 py-2.5 rounded-lg bg-bg-card border border-border text-text-primary text-[13px] min-w-[260px] cursor-pointer focus:outline-none focus:border-accent-cyan appearance-none"
-        >
-          <option value="">Select a resume...</option>
-          {resumes.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.filename}
-            </option>
-          ))}
-        </select>
+      {/* Resume selector */}
+      <select
+        value={selected?.id ?? ""}
+        onChange={(e) => selectResume(Number(e.target.value))}
+        className="appearance-none bg-surface-raised border border-border-default rounded-[6px] px-3 py-2 text-[13px] text-text-bright w-full max-w-md mb-6 focus:outline-none focus:border-primary"
+      >
+        {resumes.map((r) => (
+          <option key={r.id} value={r.id}>{r.filename} — Score: {r.best_score}</option>
+        ))}
+      </select>
 
-        <select
-          value={selectedRole}
-          onChange={(e) => setSelectedRole(e.target.value)}
-          className="px-4 py-2.5 rounded-lg bg-bg-card border border-border text-text-primary text-[13px] min-w-[260px] cursor-pointer focus:outline-none focus:border-accent-cyan appearance-none"
-        >
-          <option value="">Select a role...</option>
-          {roles.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
-      </div>
+      {selected && Object.entries(selected.role_analyses || {}).map(([roleName, analysis]) => {
+        const tips: Tip[] = analysis.tips || [];
+        if (tips.length === 0) return null;
 
-      {/* Score summary */}
-      {analysis && (
-        <div className="flex items-center gap-5 mb-6 p-4 bg-bg-card border border-border rounded-xl">
-          <ScoreGauge score={analysis.score} size={64} />
-          <div>
-            <div className="text-base font-bold text-text-bright">{resumeName}</div>
-            <div className="text-[13px] text-text-secondary">
-              {analysis.label} fit for{" "}
-              <strong className="text-accent-cyan">{selectedRole}</strong> ·{" "}
-              {analysis.coverage_pct}% keyword coverage · {tips.length} improvement tips
+        return (
+          <div key={roleName} className="mb-4 bg-surface-raised border border-border-default rounded-[6px] p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[13px] font-semibold text-text-bright">{roleName}</h2>
+              <div className="flex items-center gap-2">
+                <ScoreGauge score={analysis.score} size={32} />
+                <span className="text-[11px] text-text-muted">{tips.length} tips</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {tips.map((tip, i) => (
+                <div key={i} className="flex items-start gap-3 py-2 border-b border-border-default last:border-0">
+                  <span className={`text-[10px] font-semibold uppercase tracking-wide w-16 shrink-0 pt-0.5 ${severityColor(tip.severity)}`}>
+                    {tip.severity}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[12px] font-medium text-text-bright">{tip.title}</div>
+                    <div className="text-[11px] text-text-secondary leading-relaxed mt-0.5">{tip.description}</div>
+                    {tip.keywords && tip.keywords.length > 0 && (
+                      <div className="text-[10px] text-text-muted mt-1">
+                        Missing: {tip.keywords.join(", ")}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-text-muted px-1.5 py-0.5 border border-border-default rounded shrink-0">
+                    {tip.category}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      )}
+        );
+      })}
+    </div>
+  );
+}
 
-      {/* Tips */}
-      {!selectedResumeId || !selectedRole ? (
-        <div className="text-center py-16 text-text-muted text-sm">
-          Select a resume and a role to see tips
-        </div>
-      ) : tips.length === 0 ? (
-        <div className="text-center py-16 text-text-muted text-sm">
-          No specific tips — this resume is well-optimized for {selectedRole}!
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {tips.map((tip, i) => (
-            <div
-              key={i}
-              className={`bg-bg-card border border-border rounded-xl p-5 border-l-[3px] ${severityColor(tip.severity)} hover:bg-bg-card-hover transition-all duration-200`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${badgeClass(tip.severity)}`}
-                >
-                  {tip.severity}
-                </span>
-                <span className="text-sm font-semibold text-text-bright">{tip.title}</span>
-              </div>
-              <p className="text-[13px] text-text-secondary leading-relaxed mb-2.5">
-                {tip.description}
-              </p>
-              {tip.keywords.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {tip.keywords.map((kw) => (
-                    <span
-                      key={kw}
-                      className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-accent-purple/12 text-accent-purple border border-accent-purple/20"
-                    >
-                      {kw}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+function Loader() {
+  return (
+    <div className="flex items-center justify-center h-[50vh]">
+      <div className="w-5 h-5 border-2 border-border-default border-t-primary rounded-full animate-spin" />
     </div>
   );
 }

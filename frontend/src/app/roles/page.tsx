@@ -1,51 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchAPI, RoleDetail, OverviewData } from "@/lib/api";
+import { fetchAPI, OverviewData, RoleData } from "@/lib/api";
 import ScoreGauge from "@/components/ScoreGauge";
-import { getScoreClass } from "@/components/ScoreGauge";
+import KeywordPill from "@/components/KeywordPill";
 
 export default function RolesPage() {
-  const [roles, setRoles] = useState<string[]>([]);
+  const [overview, setOverview] = useState<OverviewData | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>("");
-  const [roleData, setRoleData] = useState<RoleDetail | null>(null);
+  const [roleData, setRoleData] = useState<RoleData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchAPI<OverviewData>("/api/overview").then((d) => {
-      setRoles(d.roles);
-      if (d.roles.length > 0) {
-        setSelectedRole(d.roles[0]);
-      }
-      setLoading(false);
-    });
+      setOverview(d);
+      if (d.roles.length > 0) setSelectedRole(d.roles[0]);
+    }).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     if (!selectedRole) return;
-    setLoading(true);
-    fetchAPI<RoleDetail>(`/api/role/${encodeURIComponent(selectedRole)}`)
-      .then(setRoleData)
-      .finally(() => setLoading(false));
+    setRoleData(null);
+    fetchAPI<RoleData>(`/api/role/${encodeURIComponent(selectedRole)}`).then(setRoleData);
   }, [selectedRole]);
+
+  if (loading) return <Loader />;
+  if (!overview) return <p className="text-text-secondary">Failed to load.</p>;
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-[28px] font-extrabold gradient-text mb-1">Role Deep-Dive</h1>
-        <p className="text-text-secondary text-sm">Select a role to see how your resumes stack up</p>
-      </div>
+      <h1 className="text-lg font-semibold text-text-bright tracking-tight mb-1">Role Deep-Dive</h1>
+      <p className="text-[13px] text-text-secondary mb-5">Select a role to view resume rankings and keyword analysis</p>
 
-      {/* Role Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {roles.map((role) => (
+      {/* Role tabs */}
+      <div className="flex gap-1 mb-6 border-b border-border-default pb-px">
+        {overview.roles.map((role) => (
           <button
             key={role}
             onClick={() => setSelectedRole(role)}
-            className={`px-5 py-2 rounded-full text-[13px] font-semibold border transition-all duration-200 cursor-pointer ${
+            className={`px-3 py-2 text-[13px] font-medium border-b-2 transition-colors -mb-px ${
               selectedRole === role
-                ? "bg-accent-cyan/15 border-accent-cyan/30 text-accent-cyan"
-                : "bg-bg-glass border-border text-text-secondary hover:bg-bg-glass-hover hover:text-text-primary"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-secondary hover:text-text-primary"
             }`}
           >
             {role}
@@ -53,61 +50,77 @@ export default function RolesPage() {
         ))}
       </div>
 
-      {loading && (
-        <div className="flex justify-center py-12">
-          <div className="w-10 h-10 border-3 border-border border-t-accent-cyan rounded-full animate-spin" />
+      {/* Rankings table */}
+      {roleData ? (
+        <div className="bg-surface-raised border border-border-default rounded-[6px] overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="border-b border-border-default text-text-muted text-[11px] uppercase tracking-wide">
+                <th className="text-left font-medium px-4 py-2.5">#</th>
+                <th className="text-left font-medium px-4 py-2.5">Resume</th>
+                <th className="text-left font-medium px-4 py-2.5">Type</th>
+                <th className="text-left font-medium px-4 py-2.5">Score</th>
+                <th className="text-left font-medium px-4 py-2.5">Label</th>
+                <th className="text-left font-medium px-4 py-2.5">Coverage</th>
+                <th className="text-left font-medium px-4 py-2.5">Keywords</th>
+              </tr>
+            </thead>
+            <tbody>
+              {roleData.resumes.map((r, i) => (
+                <tr
+                  key={r.id}
+                  onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
+                  className="border-b border-border-default last:border-0 hover:bg-surface-overlay cursor-pointer transition-colors"
+                >
+                  <td className="px-4 py-2.5 text-text-muted">{i + 1}</td>
+                  <td className="px-4 py-2.5 text-text-bright font-medium truncate max-w-[220px]">{r.filename}</td>
+                  <td className="px-4 py-2.5">
+                    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border ${
+                      r.doc_type === "Resume"
+                        ? "border-primary/20 text-primary bg-primary-subtle"
+                        : "border-warning/20 text-warning bg-warning-subtle"
+                    }`}>
+                      {r.doc_type}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <ScoreGauge score={r.score} size={36} />
+                  </td>
+                  <td className="px-4 py-2.5 text-text-secondary">{r.label}</td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full"
+                          style={{ width: `${r.coverage}%` }}
+                        />
+                      </div>
+                      <span className="text-text-muted text-[11px]">{r.coverage}%</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2.5 text-text-secondary">{r.found}/{r.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+      ) : (
+        <Loader />
       )}
 
-      {!loading && roleData && (
-        <div>
-          {/* Rankings */}
-          <div className="flex flex-col gap-3 mb-8">
-            {roleData.resumes.map((r, i) => (
-              <div
-                key={r.id}
-                className="bg-bg-card border border-border rounded-xl px-6 py-5 grid grid-cols-[auto_1fr_auto] gap-5 items-center hover:bg-bg-card-hover hover:border-border-hover transition-all duration-200"
-              >
-                <div className={`text-xl font-extrabold min-w-[32px] text-center ${i === 0 ? "gradient-text" : "text-text-muted"}`}>
-                  #{i + 1}
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-text-bright mb-1">{r.filename}</h3>
-                  <div className="text-xs text-text-secondary">
-                    {r.doc_type} · {r.coverage}% coverage · {r.found}/{r.total} keywords
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <ScoreGauge score={r.score} size={48} />
-                  <span className={`text-[13px] font-semibold ${getScoreClass(r.score)}`}>
-                    {r.label}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Keyword Reference */}
-          <h3 className="text-base font-bold text-text-primary mb-4">
-            Keywords for {roleData.role}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {/* Keywords breakdown */}
+      {roleData && (
+        <div className="mt-6">
+          <h2 className="text-[13px] font-semibold text-text-secondary uppercase tracking-wide mb-3">
+            Keyword Categories for {selectedRole}
+          </h2>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             {Object.entries(roleData.keywords).map(([category, keywords]) => (
-              <div
-                key={category}
-                className="bg-bg-card border border-border rounded-xl p-4"
-              >
-                <div className="text-[13px] font-bold text-accent-cyan uppercase tracking-wide mb-3">
-                  {category}
-                </div>
+              <div key={category} className="bg-surface-raised border border-border-default rounded-[6px] p-4">
+                <h3 className="text-[12px] font-semibold text-text-bright mb-2">{category}</h3>
                 <div className="flex flex-wrap gap-1.5">
                   {keywords.map((kw) => (
-                    <span
-                      key={kw}
-                      className="px-2.5 py-1 rounded-full text-xs font-medium bg-found-bg text-found border border-found/20"
-                    >
-                      {kw}
-                    </span>
+                    <KeywordPill key={kw} keyword={kw} found={true} />
                   ))}
                 </div>
               </div>
@@ -115,6 +128,14 @@ export default function RolesPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function Loader() {
+  return (
+    <div className="flex items-center justify-center py-16">
+      <div className="w-5 h-5 border-2 border-border-default border-t-primary rounded-full animate-spin" />
     </div>
   );
 }

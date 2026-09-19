@@ -4,99 +4,47 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  {
-    href: "/",
-    label: "Overview",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-[18px] h-[18px]">
-        <rect x="3" y="3" width="7" height="7" rx="1" />
-        <rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" />
-        <rect x="14" y="14" width="7" height="7" rx="1" />
-      </svg>
-    ),
-  },
-  {
-    href: "/roles",
-    label: "Role Deep-Dive",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-[18px] h-[18px]">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-        <path d="M2 17l10 5 10-5" />
-        <path d="M2 12l10 5 10-5" />
-      </svg>
-    ),
-  },
-  {
-    href: "/inspector",
-    label: "Resume Inspector",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-[18px] h-[18px]">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" />
-      </svg>
-    ),
-  },
-  {
-    href: "/matrix",
-    label: "Keyword Matrix",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-[18px] h-[18px]">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <line x1="3" y1="9" x2="21" y2="9" />
-        <line x1="3" y1="15" x2="21" y2="15" />
-        <line x1="9" y1="3" x2="9" y2="21" />
-        <line x1="15" y1="3" x2="15" y2="21" />
-      </svg>
-    ),
-  },
-  {
-    href: "/tips",
-    label: "Resume Tips",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-[18px] h-[18px]">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="16" x2="12" y2="12" />
-        <line x1="12" y1="8" x2="12.01" y2="8" />
-      </svg>
-    ),
-  },
+  { href: "/", label: "Overview", icon: "M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z" },
+  { href: "/roles", label: "Role Deep-Dive", icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" },
+  { href: "/inspector", label: "Resume Inspector", icon: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8" },
+  { href: "/matrix", label: "Keyword Matrix", icon: "M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" },
+  { href: "/tips", label: "Resume Tips", icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 16v-4M12 8h.01" },
+  { href: "/chat", label: "AI Chat", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
+  { href: "/jobs", label: "Job Match", icon: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed left-0 top-0 bottom-0 w-[240px] bg-bg-secondary border-r border-border flex flex-col p-6 z-50">
+    <nav className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-default flex flex-col z-50">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-3 mb-8">
-        <div className="w-10 h-10 bg-gradient-to-br from-accent-cyan to-accent-purple rounded-[10px] flex items-center justify-center font-extrabold text-sm text-black shrink-0">
+      <div className="flex items-center gap-2.5 px-5 h-14 border-b border-border-default">
+        <div className="w-7 h-7 rounded-[6px] bg-primary flex items-center justify-center text-[10px] font-bold text-white shrink-0">
           RI
         </div>
-        <span className="font-bold text-[13px] leading-tight text-text-bright">
-          Resume<br />Intelligence
+        <span className="text-[13px] font-semibold text-text-bright">
+          Resume Intelligence
         </span>
       </div>
 
       {/* Nav Links */}
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col gap-0.5 px-2.5 pt-3">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-[13.5px] font-medium transition-all duration-200 ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-[6px] text-[13px] font-medium transition-colors ${
                   isActive
-                    ? "bg-accent-cyan/10 text-accent-cyan"
-                    : "text-text-secondary hover:bg-bg-glass-hover hover:text-text-primary"
+                    ? "bg-primary-subtle text-primary"
+                    : "text-text-secondary hover:bg-surface-overlay hover:text-text-primary"
                 }`}
               >
-                <span className={isActive ? "opacity-100" : "opacity-60"}>
-                  {item.icon}
-                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 shrink-0">
+                  <path d={item.icon} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
                 <span>{item.label}</span>
               </Link>
             </li>

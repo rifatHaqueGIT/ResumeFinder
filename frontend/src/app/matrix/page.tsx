@@ -1,56 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchAPI, MatrixData, OverviewData } from "@/lib/api";
+import { fetchAPI, KeywordMatrixData, OverviewData } from "@/lib/api";
 
 export default function MatrixPage() {
+  const [data, setData] = useState<KeywordMatrixData | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
   const [selectedRole, setSelectedRole] = useState("");
-  const [matrixData, setMatrixData] = useState<MatrixData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
+      fetchAPI<KeywordMatrixData>("/api/keyword-matrix"),
       fetchAPI<OverviewData>("/api/overview"),
-      fetchAPI<MatrixData>("/api/keyword-matrix"),
-    ]).then(([overview, matrix]) => {
+    ]).then(([matrix, overview]) => {
+      setData(matrix);
       setRoles(overview.roles);
-      setMatrixData(matrix);
       if (overview.roles.length) setSelectedRole(overview.roles[0]);
-      setLoading(false);
-    });
+    }).finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="w-10 h-10 border-3 border-border border-t-accent-cyan rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <Loader />;
+  if (!data || !data.matrix) return <p className="text-text-secondary">Failed to load.</p>;
 
-  const roleMatrix = matrixData?.matrix[selectedRole];
-  const resumeNames = matrixData?.resume_names || [];
+  const roleMatrix = data.matrix[selectedRole];
+  const resumeNames = data.resume_names?.slice(0, 15) || [];
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-[28px] font-extrabold gradient-text mb-1">Keyword Gap Matrix</h1>
-        <p className="text-text-secondary text-sm">
-          Every keyword across all roles vs. all resumes — find your blind spots
-        </p>
-      </div>
+      <h1 className="text-lg font-semibold text-text-bright tracking-tight mb-1">Keyword Gap Matrix</h1>
+      <p className="text-[13px] text-text-secondary mb-5">
+        Keyword presence across resumes (showing first 15)
+      </p>
 
-      {/* Role Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      {/* Role tabs */}
+      <div className="flex gap-1 mb-6 border-b border-border-default pb-px">
         {roles.map((role) => (
           <button
             key={role}
             onClick={() => setSelectedRole(role)}
-            className={`px-5 py-2 rounded-full text-[13px] font-semibold border transition-all duration-200 cursor-pointer ${
+            className={`px-3 py-2 text-[13px] font-medium border-b-2 transition-colors -mb-px ${
               selectedRole === role
-                ? "bg-accent-cyan/15 border-accent-cyan/30 text-accent-cyan"
-                : "bg-bg-glass border-border text-text-secondary hover:bg-bg-glass-hover hover:text-text-primary"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-secondary hover:text-text-primary"
             }`}
           >
             {role}
@@ -58,62 +50,56 @@ export default function MatrixPage() {
         ))}
       </div>
 
-      {/* Matrix Table */}
-      {roleMatrix && (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full border-collapse text-xs">
-            <thead>
-              <tr>
-                <th className="bg-bg-secondary text-text-secondary px-3 py-2.5 text-left font-semibold uppercase tracking-wide text-[11px] sticky top-0 z-10 border-b border-border">
-                  Category
-                </th>
-                <th className="bg-bg-secondary text-text-secondary px-3 py-2.5 text-left font-semibold uppercase tracking-wide text-[11px] sticky top-0 z-10 border-b border-border">
-                  Keyword
-                </th>
-                {resumeNames.map((name) => (
-                  <th
-                    key={name}
-                    className="bg-bg-secondary text-text-secondary px-2 py-2.5 text-center font-semibold uppercase tracking-wide text-[10px] sticky top-0 z-10 border-b border-border max-w-[100px] truncate"
-                    title={name}
-                  >
-                    {name.length > 12 ? name.slice(0, 10) + ".." : name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(roleMatrix.categories).map(([category, keywords]) =>
-                keywords.map((kw, i) => (
-                  <tr key={`${category}-${kw.keyword}`} className="hover:bg-bg-glass-hover transition-colors">
-                    {i === 0 && (
-                      <td
-                        rowSpan={keywords.length}
-                        className="px-3 py-2 font-bold text-accent-cyan text-[11px] uppercase align-top border-b border-border"
-                      >
-                        {category}
-                      </td>
-                    )}
-                    <td className="px-3 py-2 font-medium text-text-primary border-b border-border">
-                      {kw.keyword}
-                    </td>
+      {roleMatrix?.categories &&
+        Object.entries(roleMatrix.categories).map(([category, keywords]) => (
+          <div key={category} className="mb-6">
+            <h2 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wide mb-2">{category}</h2>
+            <div className="bg-surface-raised border border-border-default rounded-[6px] overflow-x-auto">
+              <table className="w-full text-[11px]">
+                <thead>
+                  <tr className="border-b border-border-default">
+                    <th className="text-left font-medium text-text-muted px-3 py-2 sticky left-0 bg-surface-raised min-w-[120px]">
+                      Keyword
+                    </th>
                     {resumeNames.map((name) => (
-                      <td key={name} className="px-2 py-2 text-center border-b border-border">
-                        <span
-                          className={`block w-5 h-5 rounded-full mx-auto ${
-                            kw.resumes[name]
-                              ? "bg-found shadow-[0_0_8px_rgba(34,197,94,0.3)]"
-                              : "bg-missing-bg border-2 border-missing/30"
-                          }`}
-                        />
-                      </td>
+                      <th key={name} className="font-medium text-text-muted px-1 py-2 text-center">
+                        <span className="inline-block max-w-[60px] truncate" title={name}>
+                          {name.replace(/\.(pdf|docx|txt)$/i, "").slice(0, 8)}
+                        </span>
+                      </th>
                     ))}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                </thead>
+                <tbody>
+                  {(keywords as Array<{ keyword: string; resumes: Record<string, boolean> }>).map((row) => (
+                    <tr key={row.keyword} className="border-b border-border-default last:border-0">
+                      <td className="px-3 py-1.5 text-text-bright font-medium sticky left-0 bg-surface-raised">
+                        {row.keyword}
+                      </td>
+                      {resumeNames.map((name) => (
+                        <td key={name} className="text-center px-1 py-1.5">
+                          <span
+                            className={`inline-block w-2.5 h-2.5 rounded-full ${
+                              row.resumes?.[name] ? "bg-positive" : "bg-surface-overlay"
+                            }`}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+    </div>
+  );
+}
+
+function Loader() {
+  return (
+    <div className="flex items-center justify-center h-[50vh]">
+      <div className="w-5 h-5 border-2 border-border-default border-t-primary rounded-full animate-spin" />
     </div>
   );
 }
